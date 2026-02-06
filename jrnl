@@ -1,0 +1,33 @@
+#!/bin/bash
+
+function get_current_date() {
+	curDate=$(date | awk '{print $2"-"$3"-"$7}')
+}
+
+function get_current_month() {
+	curMonth=$(date | awk '{print $2}')
+}
+
+function check_for_dir() {
+	dir_path="/home/nubix/Journal/$curMonth"
+	if [[ ! -d $dir_path ]]; then
+		mkdir $dir_path
+	fi
+}
+
+function check_for_file() {
+	file_path="$dir_path/$curDate"
+	if [[ ! -f $file_path ]]; then
+		touch $file_path
+		echo =============================== >> $file_path
+		date >> $file_path
+		echo =============================== >> $file_path
+		echo >> $file_path
+	fi
+}
+
+get_current_month
+get_current_date
+check_for_dir
+check_for_file
+vim $file_path
