@@ -9,7 +9,7 @@ function get_current_month() {
 }
 
 function check_for_dir() {
-	dir_path="/home/nubix/Journal/$curMonth"
+	dir_path="~/Journal/$curMonth"
 	if [[ ! -d $dir_path ]]; then
 		mkdir $dir_path
 	fi
