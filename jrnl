@@ -16,7 +16,7 @@ function check_for_dir() {
 }
 
 function check_for_file() {
-	file_path="/home/nubix/Journal/$curDate"
+	file_path="$dir_path/$curDate"
 	if [[ ! -f $file_path ]]; then
 		touch $file_path
 		echo =============================== >> $file_path
@@ -30,3 +30,4 @@ get_current_month
 get_current_date
 check_for_dir
 check_for_file
+vim $file_path
