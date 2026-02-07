@@ -1,11 +1,9 @@
 #!/bin/bash
 
 function get_current_date() {
+	# Get the current date and parse it into the jrnl filename format
 	curDate=$(date | awk '{print $2"-"$3"-"$7}')
-}
-
-function get_current_month() {
-	curMonth=$(date | awk '{print $2}')
+	curMonth=$(echo $curDate | awk -F '-' '{print $1}')
 }
 
 function check_for_dir() {
@@ -19,6 +17,11 @@ function check_for_file() {
 	file_path="$dir_path/$curDate"
 	if [[ ! -f $file_path ]]; then
 		touch $file_path
+		echo =============================== >> $file_path
+		date >> $file_path
+		echo =============================== >> $file_path
+		echo >> $file_path
+	else
 		echo =============================== >> $file_path
 		date >> $file_path
 		echo =============================== >> $file_path
