@@ -7,7 +7,7 @@ function get_current_date() {
 }
 
 function check_for_dir() {
-	dir_path="~/Journal/$curMonth"
+	dir_path="/home/$USER/Journal/$curMonth"
 	if [[ ! -d $dir_path ]]; then
 		mkdir $dir_path
 	fi
@@ -29,8 +29,7 @@ function check_for_file() {
 	fi
 }
 
-get_current_month
 get_current_date
 check_for_dir
 check_for_file
-vim $file_path
+#vim $file_path
