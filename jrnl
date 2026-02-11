@@ -35,7 +35,7 @@ function check_if_jrnl_in_path() {
 	jrnl_cmd=$(which jrnl || "")
 	if [ -n $jrnl_cmd ]; then
 		locate_jrnl_install
-	       	if [ ! -l $HOME/.local/bin/jrnl ]
+	       	if [ ! -l $HOME/.local/bin/jrnl ]; then
 			ln -s $jrnl_install_loc $HOME/.local/bin/jrnl
 		fi 
 	fi
