@@ -32,20 +32,20 @@ function get_last_line_in_file() {
 }
 
 function check_if_jrnl_in_path() {
-	jrnl_cmd=$(which jrnl || "")
+	jrnl_cmd=$(which jrnl)
 	if [ -n $jrnl_cmd ]; then
-		dir=$(pwd)
-		echo $dir
+		locate_jrnl_install
+	       	if [ ! -L "$HOME/.local/bin/jrnl" ]; then
+			ln -s $jrnl_install_loc $HOME/.local/bin/jrnl
+		fi 
 	fi
 }
 
 function locate_jrnl_install() {
-	jrnl_install_loc=$(find ~ -wholename "*/jrnl/jrnl" -type f 2> /dev/null)
-	echo $jrnl_install_loc
+	jrnl_install_loc=$(find ~ -wholename "*/jrnl/jrnl" -not -path "*/." -type f 2> /dev/null) 
 }
 
-#check_if_jrnl_in_path
-#locate_jrnl_install
+check_if_jrnl_in_path
 get_current_date
 check_for_dir
 check_for_file
