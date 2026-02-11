@@ -32,25 +32,21 @@ function get_last_line_in_file() {
 }
 
 function check_if_jrnl_in_path() {
-	jrnl_cmd=$(which jrnl || "")
+	jrnl_cmd=$(which jrnl)
 	if [ -n $jrnl_cmd ]; then
 		locate_jrnl_install
-	       	if [ ! -l $HOME/.local/bin/jrnl ]; then
+	       	if [ ! -L "$HOME/.local/bin/jrnl" ]; then
 			ln -s $jrnl_install_loc $HOME/.local/bin/jrnl
 		fi 
 	fi
 }
 
 function locate_jrnl_install() {
-	jrnl_install_loc=$(find ~ -wholename "*/jrnl/jrnl" -not -path "*/." -type f 2> /dev/null || "")
-}
-
-function link_jrnl_to_path() {
-	ln -s $jrnl_install_loc $HOME/.local/bin/jrnl
+	jrnl_install_loc=$(find ~ -wholename "*/jrnl/jrnl" -not -path "*/." -type f 2> /dev/null) 
 }
 
 check_if_jrnl_in_path
-#get_current_date
-#check_for_dir
-#check_for_file
-#vim $file_path
+get_current_date
+check_for_dir
+check_for_file
+vim $file_path
