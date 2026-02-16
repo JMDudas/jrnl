@@ -1,13 +1,12 @@
 #!/bin/bash
 
 #ENVS
-JOURNAL_DIR=$($JOURNAL_DIR || "$HOME/Journal")
-CURMONTH_DIR=$($CURMONTH_DIR || "")
-
+JOURNAL_DIR=${JOURNAL_DIR:-"$HOME/Journal"}
+CURMONTH_DIR=${CURMONTH_DIR:-""}
 function get_current_date() {
 	# Get the current date and parse it into the jrnl filename format
-	curDate=$(date | awk '{print $2"-"$3"-"$7}')
-	curMonth=$(echo $curDate | awk -F '-' '{print $1}')
+	curDate=$( date | awk '{print $2"-"$3"-"$7}' )
+	curMonth=$( echo $curDate | awk -F '-' '{print $1}' )
 }
 
 function check_for_dir() {
@@ -51,7 +50,8 @@ function locate_jrnl_install() {
 
 check_if_jrnl_in_path
 get_current_date
-check_for_dir $JOURNAL_DIR
-check_for_dir $CURMONTH_DIR=$(JOURNAL_DIR/$curMonth)
+check_for_dir "$JOURNAL_DIR"
+CURMONTH_DIR="$JOURNAL_DIR/$curMonth"
+check_for_dir "$CURMONTH_DIR"
 check_for_file
 vim $file_path
