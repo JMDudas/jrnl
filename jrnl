@@ -1,0 +1,52 @@
+#!/bin/bash
+
+function get_current_date() {
+	# Get the current date and parse it into the jrnl filename format
+	curDate=$(date | awk '{print $2"-"$3"-"$7}')
+	curMonth=$(echo $curDate | awk -F '-' '{print $1}')
+}
+
+function check_for_dir() {
+	dir_path="/home/$USER/Journal/$curMonth"
+	if [[ ! -d $dir_path ]]; then
+		mkdir $dir_path
+	fi
+}
+
+function check_for_file() {
+	file_path="$dir_path/$curDate"
+	if [[ ! -f $file_path ]]; then
+		touch $file_path
+	elif [ -n get_last_line_in_file ]; then
+		echo >> $file_path
+	fi
+
+	echo =============================== >> $file_path
+	date >> $file_path
+	echo =============================== >> $file_path
+	echo >> $file_path
+}
+
+function get_last_line_in_file() {
+	last_line=$(awk 'END{print}' $file_path)
+}
+
+function check_if_jrnl_in_path() {
+	jrnl_cmd=$(which jrnl)
+	if [ -n $jrnl_cmd ]; then
+		locate_jrnl_install
+	       	if [ ! -L "$HOME/.local/bin/jrnl" ]; then
+			ln -s $jrnl_install_loc $HOME/.local/bin/jrnl
+		fi 
+	fi
+}
+
+function locate_jrnl_install() {
+	jrnl_install_loc=$(find ~ -wholename "*/jrnl/jrnl" -not -path "*/." -type f 2> /dev/null) 
+}
+
+check_if_jrnl_in_path
+get_current_date
+check_for_dir
+check_for_file
+vim $file_path
