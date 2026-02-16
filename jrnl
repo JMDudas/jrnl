@@ -16,16 +16,21 @@ function set_config_settings() {
 	for ((i = 0; i <= "${#config_settings[@]}"; i++)); do
 		for key in ${config_settings[$i]}; do
 			echo "This it the key:" $key
+			setting=$(echo ${config_settings[$i]} | awk '{print $2}')
+
 			case "$key" in
-				"JOURNAL_DIR")
-					setting=$(echo ${config_settings[$i]} | awk '{print $2}')
-					printf "This is the setting for JOUNRAL_DIR: %s\n" "$setting" 
-					break
-				;;
-				*)
-					printf "Not a valid config key: %s\n" "${key}"
-					break
-				;;
+			"JOURNAL_DIR")
+				printf "This is the setting for JOUNRAL_DIR: %s\n" "$setting" 
+				break
+			;;
+			"LOGGING_DIR")
+				printf "This is the setting for LOGGING_DIR: %s\n" "$setting"	
+				break
+			;;
+			*)
+				printf "Not a valid config key: %s\n" "${key}"
+				break
+			;;
 			esac
 		done
 	done
