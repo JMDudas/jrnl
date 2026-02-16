@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#ENVS
+JOURNAL_DIR=$($JOURNAL_DIR || "$HOME/Journal")
+CURMONTH_DIR=$($CURMONTH_DIR || "")
+
 function get_current_date() {
 	# Get the current date and parse it into the jrnl filename format
 	curDate=$(date | awk '{print $2"-"$3"-"$7}')
@@ -7,20 +11,20 @@ function get_current_date() {
 }
 
 function check_for_dir() {
-	dir_path="/home/$USER/Journal/$curMonth"
+	dir_path=$1
 	if [[ ! -d $dir_path ]]; then
 		mkdir $dir_path
 	fi
 }
 
 function check_for_file() {
-	file_path="$dir_path/$curDate"
+	file_path="$CURMONTH_DIR/$curDate"
 	if [[ ! -f $file_path ]]; then
 		touch $file_path
 	elif [ -n get_last_line_in_file ]; then
 		echo >> $file_path
 	fi
-
+	# Inserts the first entry header after file creation
 	echo =============================== >> $file_path
 	date >> $file_path
 	echo =============================== >> $file_path
@@ -47,6 +51,7 @@ function locate_jrnl_install() {
 
 check_if_jrnl_in_path
 get_current_date
-check_for_dir
+check_for_dir $JOURNAL_DIR
+check_for_dir $CURMONTH_DIR=$(JOURNAL_DIR/$curMonth)
 check_for_file
 vim $file_path
