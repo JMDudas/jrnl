@@ -3,6 +3,14 @@
 #ENVS
 JOURNAL_DIR=${JOURNAL_DIR:-"$HOME/Journal"}
 CURMONTH_DIR=${CURMONTH_DIR:-""}
+
+function read_config_file() {
+	locate_jrnl_install
+	install_path=$(echo $jrnl_install_loc | awk -F '/' '{ for (i = 1; i < NF; i++) {printf $i"/"}}')
+	config_file="$install_path/jrnl.config"
+	cat $config_file
+}
+
 function get_current_date() {
 	# Get the current date and parse it into the jrnl filename format
 	curDate=$( date | awk '{print $2"-"$3"-"$7}' )
@@ -12,7 +20,7 @@ function get_current_date() {
 function check_for_dir() {
 	dir_path=$1
 	if [[ ! -d $dir_path ]]; then
-		mkdir $dir_path
+		mkdir -p $dir_path
 	fi
 }
 
@@ -48,10 +56,11 @@ function locate_jrnl_install() {
 	jrnl_install_loc=$(find ~ -wholename "*/jrnl/jrnl" -not -path "*/." -type f 2> /dev/null) 
 }
 
+read_config_file
 check_if_jrnl_in_path
 get_current_date
 check_for_dir "$JOURNAL_DIR"
 CURMONTH_DIR="$JOURNAL_DIR/$curMonth"
 check_for_dir "$CURMONTH_DIR"
 check_for_file
-vim $file_path
+#vim $file_path
