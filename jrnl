@@ -8,7 +8,27 @@ function read_config_file() {
 	locate_jrnl_install
 	install_path=$(echo $jrnl_install_loc | awk -F '/' '{ for (i = 1; i < NF; i++) {printf $i"/"}}')
 	config_file="$install_path/jrnl.config"
-	cat $config_file
+	readarray config_settings < <(awk -F'=' '{ chr=substr($i, 1,1); if (chr != "#") {print $1, $2}}' $config_file)
+	set_config_settings
+}
+
+function set_config_settings() {
+	for ((i = 0; i <= "${#config_settings[@]}"; i++)); do
+		for key in ${config_settings[$i]}; do
+			echo "This it the key:" $key
+			case "$key" in
+				"JOURNAL_DIR")
+					setting=$(echo ${config_settings[$i]} | awk '{print $2}')
+					printf "This is the setting for JOUNRAL_DIR: %s\n" "$setting" 
+					break
+				;;
+				*)
+					printf "Not a valid config key: %s\n" "${key}"
+					break
+				;;
+			esac
+		done
+	done
 }
 
 function get_current_date() {
