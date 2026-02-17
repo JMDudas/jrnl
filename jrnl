@@ -1,12 +1,11 @@
 #!/bin/bash
 
 #ENVS
-JOURNAL_DIR=${JOURNAL_DIR:-"$HOME/Journal"}
 CURMONTH_DIR=${CURMONTH_DIR:-""}
 
 function read_config_file() {
 	locate_jrnl_install
-	install_path=$(echo $jrnl_install_loc | awk -F '/' '{ for (i = 1; i < NF; i++) {printf $i"/"}}')
+	install_path=$(echo $jrnl_install_loc | awk -F'/' '{ for (i = 1; i < NF; i++) {printf $i"/"}}')
 	config_file="$install_path/jrnl.config"
 	readarray config_settings < <(awk -F'=' '{ chr=substr($i, 1,1); if (chr != "#") {print $1, $2}}' $config_file)
 	set_config_settings
@@ -20,11 +19,13 @@ function set_config_settings() {
 
 			case "$key" in
 			"JOURNAL_DIR")
-				printf "This is the setting for JOUNRAL_DIR: %s\n" "$setting" 
+				printf "This is the setting for JOURNAL_DIR: %s\n" "$setting" 
+				path_parser "$setting"
 				break
 			;;
 			"LOGGING_DIR")
 				printf "This is the setting for LOGGING_DIR: %s\n" "$setting"	
+				path_parser "$setting"
 				break
 			;;
 			*)
@@ -35,6 +36,43 @@ function set_config_settings() {
 		done
 	done
 }
+
+function path_parser() {
+	local raw_path=$1
+	#BREAK OUT THE PATHS INTO THEIR INDIVIDUAL DIRS. DO NOT INCLUDE ANY BLANK FIELDS - LENGTH() FUNCTION HANDLES THIS
+	readarray env_var_path_array < <(echo $raw_path | awk -F'/' '{ for (i=0; i <= NF; i++) { if (i != 0 && length($i) != 0) {print $i}}}')
+	echo "This is the current env var value:"  "${env_var_path_array[@]}"	
+	declare -i dir_count=0
+	for dir in ${env_var_path_array[@]}; do
+		echo "Word number: " "$dir_count"
+		if [[ $dir =~ ^\$ ]]; then
+			#SUBSTITUTES THE VAR VALUE TO THE ENV VALUE ex) $HOME -> /home/cur_usr/
+			temp_var=${dir:1}	
+			env_var=${!temp_var}
+			echo "THIS IS THE TEMP VAR:" "$temp_var"
+			echo "This is the ENV value:" "$env_var"
+			echo "WORD NUMBER (ENV VAR FOUND):" "$dir_count"
+			break
+		fi
+		(( dir_count++ ))
+	done
+	echo "THE CURRENT COUNT IS:" "$dir_count"
+	echo "The INDEX ITEM at that loc:" "${env_var_path_array["$dir_count"]}"
+	env_var_path_array["$dir_count"]=$env_var
+	rebuild_env_path "${env_var_path_array[@]}"
+}
+
+function rebuild_env_path() {
+	local path_array=("$@")
+	declare -i dir_count=0
+	temp_path=""
+	echo "${path_array[@]}"
+	for dir in ${path_array[@]}; do
+		temp_path+="${dir}/"
+	done
+	echo "This it the REBUILT PATH:" "$temp_path"
+}
+	
 
 function get_current_date() {
 	# Get the current date and parse it into the jrnl filename format
@@ -82,10 +120,10 @@ function locate_jrnl_install() {
 }
 
 read_config_file
-check_if_jrnl_in_path
-get_current_date
-check_for_dir "$JOURNAL_DIR"
-CURMONTH_DIR="$JOURNAL_DIR/$curMonth"
-check_for_dir "$CURMONTH_DIR"
-check_for_file
-#vim $file_path
+#check_if_jrnl_in_path
+#get_current_date
+#check_for_dir "$JOURNAL_DIR"
+#CURMONTH_DIR="$JOURNAL_DIR/$curMonth"
+#check_for_dir "$CURMONTH_DIR"
+#check_for_file
+##vim $file_path
