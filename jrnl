@@ -21,11 +21,13 @@ function set_config_settings() {
 			"JOURNAL_DIR")
 				printf "This is the setting for JOURNAL_DIR: %s\n" "$setting" 
 				path_parser "$setting"
+				JOURNAL_DIR=$temp_path  
 				break
 			;;
 			"LOGGING_DIR")
 				printf "This is the setting for LOGGING_DIR: %s\n" "$setting"	
 				path_parser "$setting"
+				LOGGING_DIR=$temp_path
 				break
 			;;
 			*)
@@ -120,10 +122,10 @@ function locate_jrnl_install() {
 }
 
 read_config_file
-#check_if_jrnl_in_path
-#get_current_date
-#check_for_dir "$JOURNAL_DIR"
-#CURMONTH_DIR="$JOURNAL_DIR/$curMonth"
-#check_for_dir "$CURMONTH_DIR"
-#check_for_file
-##vim $file_path
+check_if_jrnl_in_path
+get_current_date
+check_for_dir "$JOURNAL_DIR"
+CURMONTH_DIR="$JOURNAL_DIR/$curMonth"
+check_for_dir "$CURMONTH_DIR"
+check_for_file
+vim $file_path
