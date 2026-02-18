@@ -3,7 +3,7 @@
 function read_config_file() {
 	locate_jrnl_install
 	install_path=$(echo $jrnl_install_loc | awk -F'/' '{ for (i = 1; i < NF; i++) {printf $i"/"}}')
-	config_file="$install_path/jrnl.config"
+	config_file="$install_path""jrnl.config"
 	if (( $(ls $config_file) )); then 
 		readarray config_settings < <(awk -F'=' '{ chr=substr($i, 1,1); if (chr != "#") {print $1, $2}}' $config_file)
 		set_config_settings
@@ -72,8 +72,8 @@ function rebuild_env_path() {
 
 function get_current_date() {
 	# Get the current date and parse it into the jrnl filename format
-	curDate=$( date | awk '{print $2"-"$3"-"$7}' )
-	curMonth=$( echo $curDate | awk -F '-' '{print $1}' )
+	curDate=$( date +%h-%d-%Y )
+	curMonth=$( date +%h )
 }
 
 function check_for_dir() {
