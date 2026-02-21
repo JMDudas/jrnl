@@ -1,31 +1,34 @@
 #!/bin/bash
 
-#ENVS
-CURMONTH_DIR=${CURMONTH_DIR:-""}
-
 function read_config_file() {
 	locate_jrnl_install
 	install_path=$(echo $jrnl_install_loc | awk -F'/' '{ for (i = 1; i < NF; i++) {printf $i"/"}}')
-	config_file="$install_path/jrnl.config"
-	readarray config_settings < <(awk -F'=' '{ chr=substr($i, 1,1); if (chr != "#") {print $1, $2}}' $config_file)
-	set_config_settings
+	config_file="$install_path""jrnl.config"
+	if (( $(ls $config_file) )); then 
+		readarray config_settings < <(awk -F'=' '{ chr=substr($i, 1,1); if (chr != "#") {print $1, $2}}' $config_file)
+		set_config_settings
+	else
+		return 63
+	fi
 }
 
 function set_config_settings() {
+	#For loop keeps each Key=Val pair together
 	for ((i = 0; i <= "${#config_settings[@]}"; i++)); do
 		for key in ${config_settings[$i]}; do
-			echo "This it the key:" $key
 			setting=$(echo ${config_settings[$i]} | awk '{print $2}')
 
 			case "$key" in
 			"JOURNAL_DIR")
-				printf "This is the setting for JOURNAL_DIR: %s\n" "$setting" 
 				path_parser "$setting"
 				JOURNAL_DIR=$temp_path  
 				break
 			;;
+			"JOURNAL_EDITOR")
+				JOURNAL_EDITOR=$setting
+				break
+				;;	
 			"LOGGING_DIR")
-				printf "This is the setting for LOGGING_DIR: %s\n" "$setting"	
 				path_parser "$setting"
 				LOGGING_DIR=$temp_path
 				break
@@ -43,23 +46,16 @@ function path_parser() {
 	local raw_path=$1
 	#BREAK OUT THE PATHS INTO THEIR INDIVIDUAL DIRS. DO NOT INCLUDE ANY BLANK FIELDS - LENGTH() FUNCTION HANDLES THIS
 	readarray env_var_path_array < <(echo $raw_path | awk -F'/' '{ for (i=0; i <= NF; i++) { if (i != 0 && length($i) != 0) {print $i}}}')
-	echo "This is the current env var value:"  "${env_var_path_array[@]}"	
 	declare -i dir_count=0
 	for dir in ${env_var_path_array[@]}; do
-		echo "Word number: " "$dir_count"
 		if [[ $dir =~ ^\$ ]]; then
 			#SUBSTITUTES THE VAR VALUE TO THE ENV VALUE ex) $HOME -> /home/cur_usr/
 			temp_var=${dir:1}	
 			env_var=${!temp_var}
-			echo "THIS IS THE TEMP VAR:" "$temp_var"
-			echo "This is the ENV value:" "$env_var"
-			echo "WORD NUMBER (ENV VAR FOUND):" "$dir_count"
 			break
 		fi
 		(( dir_count++ ))
 	done
-	echo "THE CURRENT COUNT IS:" "$dir_count"
-	echo "The INDEX ITEM at that loc:" "${env_var_path_array["$dir_count"]}"
 	env_var_path_array["$dir_count"]=$env_var
 	rebuild_env_path "${env_var_path_array[@]}"
 }
@@ -68,18 +64,16 @@ function rebuild_env_path() {
 	local path_array=("$@")
 	declare -i dir_count=0
 	temp_path=""
-	echo "${path_array[@]}"
 	for dir in ${path_array[@]}; do
 		temp_path+="${dir}/"
 	done
-	echo "This it the REBUILT PATH:" "$temp_path"
 }
 	
 
 function get_current_date() {
 	# Get the current date and parse it into the jrnl filename format
-	curDate=$( date | awk '{print $2"-"$3"-"$7}' )
-	curMonth=$( echo $curDate | awk -F '-' '{print $1}' )
+	curDate=$( date +%h-%d-%Y )
+	curMonth=$( date +%h )
 }
 
 function check_for_dir() {
@@ -94,6 +88,7 @@ function check_for_file() {
 	if [[ ! -f $file_path ]]; then
 		touch $file_path
 	elif [ -n get_last_line_in_file ]; then
+		echo "LAST LINE ISN'T EMPTY!"
 		echo >> $file_path
 	fi
 	# Inserts the first entry header after file creation
@@ -121,11 +116,22 @@ function locate_jrnl_install() {
 	jrnl_install_loc=$(find ~ -wholename "*/jrnl/jrnl" -not -path "*/." -type f 2> /dev/null) 
 }
 
-read_config_file
+function load_default_settings() {
+	JOURNAL_DIR=${JOURNAL_DIR:-$HOME/Journal}
+}
+
+##SCRIPT START##
+if ! read_config_file; then
+	echo "Config file is missing. Loading defaults..."
+	JOURNAL_DIR=${JOURNAL_DIR:-"$HOME/Journal"}
+	JOURNAL_EDITOR=${JOURNAL_EDITOR:-"vim"}
+	LOGGING_DIR=${LOGGIN_DIR:-"/var/log"}
+fi
+
 check_if_jrnl_in_path
 get_current_date
 check_for_dir "$JOURNAL_DIR"
 CURMONTH_DIR="$JOURNAL_DIR/$curMonth"
 check_for_dir "$CURMONTH_DIR"
 check_for_file
-vim $file_path
+$JOURNAL_EDITOR $file_path
